@@ -2,238 +2,229 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>New Year Surprise 🎁</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-html,body{
-  margin:0;padding:0;width:100%;height:100%;
-  background:#0c0c0c;color:white;
-  font-family:Arial,sans-serif;
-  overflow:hidden;text-align:center;
-}
-.screen{
-  position:absolute;top:0;left:0;
-  width:100%;height:100%;
-  display:none;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-}
-.screen.active{display:flex;}
-button{
-  padding:15px 30px;
-  font-size:18px;
-  border:none;
-  border-radius:12px;
-  background:linear-gradient(45deg,#ff3cac,#784ba0,#2b86c5);
-  color:white;
-  cursor:pointer;
-  margin-top:20px;
-}
-input{
-  padding:12px;
-  font-size:18px;
-  border-radius:10px;
-  border:2px solid white;
-  margin-top:20px;
-  text-align:center;
-}
-#giftIcon{
-  font-size:60px;
-  cursor:pointer;
-  animation:bounce 1s infinite;
-}
-@keyframes bounce{
-  0%,100%{transform:translateY(0);}
-  50%{transform:translateY(-20px);}
-}
-canvas{
-  position:absolute;top:0;left:0;
-  pointer-events:none;
-}
-.habibaBtn{
-  position:absolute;
-}
-.emoji{
-  position:absolute;
-  font-size:50px;
-  animation:fly 1s ease forwards;
-}
-@keyframes fly{
-  from{transform:translateY(0);}
-  to{transform:translateY(-120px);}
-}
+  body {
+    margin: 0;
+    background: #0c0c0c;
+    color: white;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+    text-align: center;
+  }
+
+  .screen {
+    display: none;
+    width: 90%;
+    max-width: 600px;
+  }
+
+  .active {
+    display: block;
+  }
+
+  input, button {
+    padding: 12px;
+    font-size: 16px;
+    margin-top: 15px;
+    border-radius: 8px;
+    border: none;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  #nextBtn {
+    position: relative;
+  }
+
+  .gift {
+    font-size: 80px;
+    cursor: pointer;
+  }
+
+  .emoji {
+    position: absolute;
+    font-size: 60px;
+    animation: flyUp 1s ease-out forwards;
+  }
+
+  @keyframes flyUp {
+    from { transform: translateY(0); opacity: 0; }
+    to { transform: translateY(-120px); opacity: 1; }
+  }
 </style>
 </head>
 
 <body>
 
-<canvas id="canvas"></canvas>
-
-<!-- START -->
-<div id="start" class="screen active">
-  <h2 id="startText"></h2>
-  <button id="startBtn">Start</button>
+<div id="screen1" class="screen active">
+  <h2 id="s1text"></h2>
+  <button onclick="goToName()">Start</button>
 </div>
 
-<!-- NAME -->
-<div id="name" class="screen">
+<div id="screen2" class="screen">
   <h2 id="nameText"></h2>
-  <input id="username" placeholder="Your Name">
-  <button id="nameBtn">Next</button>
+  <input id="nameInput" placeholder="Type name here">
+  <br>
+  <button onclick="handleName()">Next</button>
 </div>
 
-<!-- ARIBA VERIFY -->
-<div id="aribaVerify" class="screen">
+<div id="screen3" class="screen">
   <h2 id="verifyText"></h2>
   <input id="verifyInput">
-  <button id="verifyBtn">Verify</button>
+  <br>
+  <button onclick="checkVerification()">Verify</button>
 </div>
 
-<!-- ARIBA FLOW -->
-<div id="aribaFlow" class="screen">
-  <h2 id="aribaMsg"></h2>
-  <button id="aribaNext">Next</button>
+<div id="screen4" class="screen">
+  <h2 id="flowText"></h2>
+  <button id="nextBtn" onclick="nextFlow()">Next</button>
 </div>
 
-<!-- HABIBA 1 -->
-<div id="habiba1" class="screen">
-  <h2 id="habiba1Text"></h2>
-  <button id="habiba1Btn">Next</button>
-</div>
-
-<!-- HABIBA 2 -->
-<div id="habiba2" class="screen">
-  <h2 id="habiba2Text"></h2>
-  <button id="habibaTpBtn" class="habibaBtn">Next</button>
-</div>
-
-<!-- HABIBA GIFT -->
-<div id="habibaGift" class="screen">
-  <div id="giftIcon">🎁</div>
-</div>
-
-<!-- GENERIC -->
-<div id="generic" class="screen">
-  <div id="giftIconGen">🎁</div>
-  <h2 id="genericMsg"></h2>
+<div id="screenGift" class="screen">
+  <div class="gift" onclick="openGift()">🎁</div>
 </div>
 
 <script>
-/* ---------- UTIL ---------- */
-function show(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-function type(el,text,cb){
-  el.innerHTML="";let i=0;
-  let t=setInterval(()=>{
-    el.innerHTML+=text[i++];
-    if(i>=text.length){clearInterval(t);if(cb)cb();}
-  },40);
-}
+let flow = "";
+let step = 0;
+let habibaTpCount = 0;
 
-/* ---------- CANVAS ---------- */
-let c=document.getElementById("canvas"),ctx=c.getContext("2d");
-c.width=innerWidth;c.height=innerHeight;
-let hearts=[];
-for(let i=0;i<20;i++){
-  hearts.push({x:Math.random()*c.width,y:Math.random()*c.height,s:Math.random()*15+5});
-}
-function anim(){
-  ctx.clearRect(0,0,c.width,c.height);
-  hearts.forEach(h=>{
-    ctx.fillStyle="rgba(255,0,150,0.4)";
-    ctx.beginPath();ctx.arc(h.x,h.y,h.s,0,Math.PI*2);ctx.fill();
-    h.y-=0.3;if(h.y<0)h.y=c.height;
-  });
-  requestAnimationFrame(anim);
-}
-anim();
-
-/* ---------- START ---------- */
-type(startText,"🎉 Ready for a Surprise?");
-startBtn.onclick=()=>{show("name");type(nameText,"Enter Your Name 💫");}
-
-/* ---------- NAME ROUTE ---------- */
-nameBtn.onclick=()=>{
-  let n=username.value.toLowerCase().trim();
-  if(n==="ariba"){
-    show("aribaVerify");
-    type(verifyText,"Verification required:");
-  }
-  else if(n==="habiba"){
-    show("habiba1");
-    type(habiba1Text,"What? New Year but it aint Happy for you 💅");
-  }
-  else{
-    show("generic");
-    genericMsg.innerHTML="";
-  }
-};
-
-/* ---------- ARIBA VERIFY ---------- */
-verifyBtn.onclick=()=>{
-  if(verifyInput.value.toLowerCase().trim()==="aweee mera bacha"){
-    show("aribaFlow");
-    aribaIndex=0;
-    type(aribaMsg,aribaMessages[0]);
-  }else{
-    show("generic");
-    type(genericMsg,"u aint my didi gtfo 🖕");
-  }
-};
-
-/* ---------- ARIBA FLOW ---------- */
-let aribaMessages=[
-  "Didi? 💖","Is it actually you? 🥹","I really love you ❤️‍🩹",
-  "Happy New Year Didi 🎆"
+const aribaMessages = [
+  "Didi?",
+  "Oh hiii didiii 😭",
+  "I made this code special… baaki sab ka isse different hai, but aapas mein same hai 💗",
+  "I really miss you 🥺",
+  "The head scratch 😌",
+  "The tea spill 💅",
+  "Aapka vo waala message really made me throw my phone 🥹",
+  "You kinda understood me like no one ever did 😌",
+  "I felt comfortable around you like I never did around anyone else 💖",
+  "❤️‍🩹 Happy New Year Didi 🎉"
 ];
-let aribaIndex=0;
-aribaNext.onclick=()=>{
-  aribaIndex++;
-  if(aribaIndex<aribaMessages.length){
-    type(aribaMsg,aribaMessages[aribaIndex]);
-  }
-};
 
-/* ---------- HABIBA ---------- */
-habiba1Btn.onclick=()=>{
-  show("habiba2");
-  type(habiba2Text,"wwwhhhaaaaaaaaaaat? Why u still heeeeeeeerreeeee? I alr said no Happy New years for you 💅");
-};
-let tpCount=0;
-const spots=[
-  {top:"10px",left:"10px"},
-  {bottom:"10px",right:"10px"},
-  {top:"10px",right:"10px"}
+const habibaMessages = [
+  "What? New Year but it ain’t happy for you 💅",
+  "WWWWHHHAAAAAAT? Why you still hereeeee?"
 ];
-habibaTpBtn.onclick=()=>{
-  if(tpCount<3){
-    Object.assign(habibaTpBtn.style,spots[tpCount]);
-    tpCount++;
-  }else{
-    show("habibaGift");
+
+function typeWriter(el, text, i = 0) {
+  el.innerHTML = "";
+  let interval = setInterval(() => {
+    el.innerHTML += text.charAt(i);
+    i++;
+    if (i >= text.length) clearInterval(interval);
+  }, 40);
+}
+
+typeWriter(document.getElementById("s1text"), "Tap Start");
+
+function goToName() {
+  show("screen2");
+  typeWriter(document.getElementById("nameText"), "Type your name");
+}
+
+function handleName() {
+  const name = document.getElementById("nameInput").value.toLowerCase();
+  if (name === "ariba") {
+    flow = "ariba";
+    show("screen3");
+    typeWriter(document.getElementById("verifyText"), "Verification required:");
+  } 
+  else if (name === "habiba") {
+    flow = "habiba";
+    step = 0;
+    show("screen4");
+    typeWriter(document.getElementById("flowText"), habibaMessages[0]);
+  } 
+  else {
+    flow = "general";
+    step = 0;
+    show("screen4");
+    typeWriter(document.getElementById("flowText"), "Happy New Year 🎉");
   }
-};
+}
 
-/* ---------- HABIBA GIFT ---------- */
-giftIcon.onclick=()=>{
-  ["🫵","🤡"].forEach((e,i)=>{
-    let d=document.createElement("div");
-    d.className="emoji";
-    d.style.left=(50+i*60)+"%";
-    d.style.top="50%";
-    d.innerText=e;
-    document.body.appendChild(d);
-  });
-};
+function checkVerification() {
+  const val = document.getElementById("verifyInput").value;
+  if (val === "aweee mera bacha") {
+    step = 0;
+    show("screen4");
+    typeWriter(document.getElementById("flowText"), aribaMessages[0]);
+  } else {
+    show("screen4");
+    typeWriter(document.getElementById("flowText"), "u aint my didi gtfo 🖕");
+  }
+}
 
-/* ---------- GENERIC ---------- */
-giftIconGen.onclick=()=>{
-  type(genericMsg,"Happy New Year 🎆✨");
-};
+function nextFlow() {
+  if (flow === "ariba") {
+    step++;
+    if (step < aribaMessages.length) {
+      typeWriter(document.getElementById("flowText"), aribaMessages[step]);
+    }
+  }
+
+  if (flow === "habiba") {
+    habibaTpCount++;
+    const btn = document.getElementById("nextBtn");
+
+    if (habibaTpCount === 1) {
+      btn.style.position = "absolute";
+      btn.style.top = "10px";
+      btn.style.left = "10px";
+    } 
+    else if (habibaTpCount === 2) {
+      btn.style.top = "auto";
+      btn.style.left = "auto";
+      btn.style.bottom = "10px";
+      btn.style.right = "10px";
+    } 
+    else if (habibaTpCount === 3) {
+      btn.style.bottom = "auto";
+      btn.style.right = "auto";
+      btn.style.top = "10px";
+      btn.style.right = "10px";
+    } 
+    else {
+      show("screenGift");
+    }
+  }
+
+  if (flow === "general") {
+    show("screenGift");
+  }
+}
+
+function openGift() {
+  const giftScreen = document.getElementById("screenGift");
+  const e1 = document.createElement("div");
+  const e2 = document.createElement("div");
+
+  e1.className = "emoji";
+  e2.className = "emoji";
+
+  e1.innerHTML = "🫵🤡";
+  e2.innerHTML = "🎉";
+
+  e1.style.left = "40%";
+  e2.style.left = "55%";
+
+  giftScreen.appendChild(e1);
+  giftScreen.appendChild(e2);
+}
+
+function show(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
 </script>
 
 </body>
