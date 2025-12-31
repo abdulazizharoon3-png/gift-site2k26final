@@ -4,284 +4,237 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>New Year Surprise 🎁</title>
+
 <style>
-html, body {
-  margin:0; padding:0; overflow:hidden; font-family:Arial,sans-serif;
-  height:100%; width:100%; background:#0c0c0c; color:white; text-align:center; position:relative;
+html,body{
+  margin:0;padding:0;width:100%;height:100%;
+  background:#0c0c0c;color:white;
+  font-family:Arial,sans-serif;
+  overflow:hidden;text-align:center;
 }
-.screen {
-  position:absolute; top:0; left:0; width:100%; height:100%; display:flex;
-  flex-direction:column; justify-content:center; align-items:center;
-  opacity:0; pointer-events:none; transition: all 0.5s ease; transform:scale(0.95);
+.screen{
+  position:absolute;top:0;left:0;
+  width:100%;height:100%;
+  display:none;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
 }
-.active {opacity:1; pointer-events:auto; transform:scale(1);}
-button {
-  padding:15px 30px; font-size:20px; border:none; border-radius:12px;
-  margin-top:20px; cursor:pointer; background: linear-gradient(45deg,#ff3cac,#784ba0,#2b86c5); color:white;
-  position:relative;
+.screen.active{display:flex;}
+button{
+  padding:15px 30px;
+  font-size:18px;
+  border:none;
+  border-radius:12px;
+  background:linear-gradient(45deg,#ff3cac,#784ba0,#2b86c5);
+  color:white;
+  cursor:pointer;
+  margin-top:20px;
 }
-input {
-  padding:12px; font-size:18px; border-radius:10px; border:2px solid white; text-align:center; margin-top:20px;
+input{
+  padding:12px;
+  font-size:18px;
+  border-radius:10px;
+  border:2px solid white;
+  margin-top:20px;
+  text-align:center;
 }
-#giftIcon {font-size:60px; cursor:pointer; animation:bounce 1s infinite;}
-@keyframes bounce {0%,100%{transform:translateY(0);}50%{transform:translateY(-20px);}}
-canvas {position:absolute; top:0; left:0; pointer-events:none;}
-h2 {padding:0 20px; line-height:1.5em;}
-.emoji {font-size:50px; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);}
+#giftIcon{
+  font-size:60px;
+  cursor:pointer;
+  animation:bounce 1s infinite;
+}
+@keyframes bounce{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-20px);}
+}
+canvas{
+  position:absolute;top:0;left:0;
+  pointer-events:none;
+}
+.habibaBtn{
+  position:absolute;
+}
+.emoji{
+  position:absolute;
+  font-size:50px;
+  animation:fly 1s ease forwards;
+}
+@keyframes fly{
+  from{transform:translateY(0);}
+  to{transform:translateY(-120px);}
+}
 </style>
 </head>
+
 <body>
 
 <canvas id="canvas"></canvas>
 
-<!-- Start Screen -->
+<!-- START -->
 <div id="start" class="screen active">
-  <h1 id="startText"></h1>
+  <h2 id="startText"></h2>
   <button id="startBtn">Start</button>
 </div>
 
-<!-- Name Input Screen -->
+<!-- NAME -->
 <div id="name" class="screen">
   <h2 id="nameText"></h2>
   <input id="username" placeholder="Your Name">
-  <button onclick="checkName()">Next</button>
+  <button id="nameBtn">Next</button>
 </div>
 
-<!-- Verification Screen for Ariba -->
-<div id="verify" class="screen">
-  <h2>Verification Required:</h2>
-  <input id="verifyInput" placeholder="Type here">
-  <button onclick="checkVerification()">Next</button>
+<!-- ARIBA VERIFY -->
+<div id="aribaVerify" class="screen">
+  <h2 id="verifyText"></h2>
+  <input id="verifyInput">
+  <button id="verifyBtn">Verify</button>
 </div>
 
-<!-- Ariba Pages Container -->
-<div id="aribaPages" class="screen"></div>
+<!-- ARIBA FLOW -->
+<div id="aribaFlow" class="screen">
+  <h2 id="aribaMsg"></h2>
+  <button id="aribaNext">Next</button>
+</div>
 
-<!-- Habiba Pages Container -->
-<div id="habibaPages" class="screen"></div>
+<!-- HABIBA 1 -->
+<div id="habiba1" class="screen">
+  <h2 id="habiba1Text"></h2>
+  <button id="habiba1Btn">Next</button>
+</div>
 
-<!-- Generic Gift Screen -->
-<div id="giftScreen" class="screen"><div id="giftIcon">🎁</div></div>
+<!-- HABIBA 2 -->
+<div id="habiba2" class="screen">
+  <h2 id="habiba2Text"></h2>
+  <button id="habibaTpBtn" class="habibaBtn">Next</button>
+</div>
 
-<!-- Generic Final Screen -->
-<div id="genericFinal" class="screen">
-  <h2 id="finalText"></h2>
+<!-- HABIBA GIFT -->
+<div id="habibaGift" class="screen">
+  <div id="giftIcon">🎁</div>
+</div>
+
+<!-- GENERIC -->
+<div id="generic" class="screen">
+  <div id="giftIconGen">🎁</div>
+  <h2 id="genericMsg"></h2>
 </div>
 
 <script>
-// Canvas setup
-let canvas=document.getElementById('canvas');
-let ctx=canvas.getContext('2d');
-canvas.width=window.innerWidth; canvas.height=window.innerHeight;
+/* ---------- UTIL ---------- */
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function type(el,text,cb){
+  el.innerHTML="";let i=0;
+  let t=setInterval(()=>{
+    el.innerHTML+=text[i++];
+    if(i>=text.length){clearInterval(t);if(cb)cb();}
+  },40);
+}
 
-// Floating hearts
+/* ---------- CANVAS ---------- */
+let c=document.getElementById("canvas"),ctx=c.getContext("2d");
+c.width=innerWidth;c.height=innerHeight;
 let hearts=[];
 for(let i=0;i<20;i++){
-  hearts.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, size:Math.random()*15+5, speed:Math.random()*0.5+0.2, opacity:Math.random()*0.4+0.3});
+  hearts.push({x:Math.random()*c.width,y:Math.random()*c.height,s:Math.random()*15+5});
 }
-
-// Confetti
-let confetti=[];
-function Confetti(){
-  this.x=Math.random()*canvas.width;
-  this.y=Math.random()*canvas.height-50;
-  this.vx=(Math.random()-0.5)*2.5;
-  this.vy=Math.random()*2+1;
-  this.color=`hsl(${Math.random()*360},100%,50%)`;
-  this.draw=function(){ctx.fillStyle=this.color; ctx.fillRect(this.x,this.y,5,10); this.x+=this.vx; this.y+=this.vy; if(this.y>canvas.height)this.y=-10;}
+function anim(){
+  ctx.clearRect(0,0,c.width,c.height);
+  hearts.forEach(h=>{
+    ctx.fillStyle="rgba(255,0,150,0.4)";
+    ctx.beginPath();ctx.arc(h.x,h.y,h.s,0,Math.PI*2);ctx.fill();
+    h.y-=0.3;if(h.y<0)h.y=c.height;
+  });
+  requestAnimationFrame(anim);
 }
+anim();
 
-// Fireworks
-let fireworks=[];
-function Firework(x,y,color){
-  this.x=x; this.y=y; this.particles=[];
-  for(let i=0;i<30;i++){
-    this.particles.push({x:x,y:y,vx:(Math.random()-0.5)*5,vy:(Math.random()-0.5)*5,alpha:1,color:color});
+/* ---------- START ---------- */
+type(startText,"🎉 Ready for a Surprise?");
+startBtn.onclick=()=>{show("name");type(nameText,"Enter Your Name 💫");}
+
+/* ---------- NAME ROUTE ---------- */
+nameBtn.onclick=()=>{
+  let n=username.value.toLowerCase().trim();
+  if(n==="ariba"){
+    show("aribaVerify");
+    type(verifyText,"Verification required:");
   }
-  this.draw=function(){
-    this.particles.forEach(p=>{ctx.fillStyle=`rgba(${p.color.r},${p.color.g},${p.color.b},${p.alpha})`; ctx.beginPath(); ctx.arc(p.x,p.y,3,0,Math.PI*2); ctx.fill(); p.x+=p.vx; p.y+=p.vy; p.alpha-=0.03;});
-    this.particles=this.particles.filter(p=>p.alpha>0);
+  else if(n==="habiba"){
+    show("habiba1");
+    type(habiba1Text,"What? New Year but it aint Happy for you 💅");
   }
-}
+  else{
+    show("generic");
+    genericMsg.innerHTML="";
+  }
+};
 
-function animate(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  hearts.forEach(h=>{ctx.fillStyle=`rgba(255,0,150,${h.opacity})`; ctx.beginPath(); ctx.arc(h.x,h.y,h.size,0,Math.PI*2); ctx.fill(); h.y-=h.speed; if(h.y<0)h.y=canvas.height;});
-  confetti.forEach(c=>c.draw());
-  fireworks.forEach(f=>f.draw());
-  fireworks=fireworks.filter(f=>f.particles.length>0);
-  requestAnimationFrame(animate);
-}
-animate();
-
-function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active');}
-function goName(){ show('name'); }
-
-// Typewriter Effect
-function typeWriter(text, element, speed=40, callback){
-  element.innerHTML="";
-  let i=0;
-  let timer=setInterval(()=>{
-    element.innerHTML+=text.charAt(i);
-    i++;
-    if(i>=text.length){clearInterval(timer); if(callback)callback();}
-  },speed);
-}
-
-// Name Check
-function checkName(){
-  let name=document.getElementById('username').value.toLowerCase().trim();
-  if(name==='ariba'){
-    show('verify');
-  }else if(name==='habiba'){
-    startHabibaFlow();
+/* ---------- ARIBA VERIFY ---------- */
+verifyBtn.onclick=()=>{
+  if(verifyInput.value.toLowerCase().trim()==="aweee mera bacha"){
+    show("aribaFlow");
+    aribaIndex=0;
+    type(aribaMsg,aribaMessages[0]);
   }else{
-    show('giftScreen');
+    show("generic");
+    type(genericMsg,"u aint my didi gtfo 🖕");
   }
-}
+};
 
-// Verification
-function checkVerification(){
-  let input=document.getElementById('verifyInput').value.toLowerCase().trim();
-  if(input==='aweee mera bacha'){
-    startAribaFlow();
-  } else{
-    alert("u ain't my Didi gtfo 🖕");
-    show('giftScreen');
-  }
-}
-
-// ARIBA FLOW
-const aribaMessages=[
-  "Didi? 💖",
-  "Is it actually you?",
-  "I really love you ❤️‍🩹",
-  "You’re the best 🥰",
-  "You kinda understood me like no one ever did 😌",
-  "I felt comfortable around you like I never did around anyone else 💖",
-  "The Head Scratch ❤️‍🩹",
-  "The Tea Spill 💅",
-  "Aapka vo waala message really made me throw my phone 🥹",
-  "❤️‍🩹 “Didi… you are unlike anyone I’ve ever met. You see me in ways no one else did, and being around you feels like coming home.”",
-  "I can laugh with you, cry with you, and share thoughts I never dared before. Every moment with you feels safe, comforting, magical, like the world pauses just for us.",
-  "Your words, your smile, your care have touched me more deeply than I can express. You are my favorite bari behn, my safe space, my inspiration, my laughter, and my heart.",
-  "Every memory we shared is a treasure, and I can’t wait to make countless more with you. You are truly special, unforgettable, and I absolutely love you 🥹❤️‍🩹. This surprise is all for you because no one deserves it more. ❤️‍🩹💖”",
-  "Happy New Year Didi ❤️‍🩹❤️‍🩹🎉🎆"
+/* ---------- ARIBA FLOW ---------- */
+let aribaMessages=[
+  "Didi? 💖","Is it actually you? 🥹","I really love you ❤️‍🩹",
+  "Happy New Year Didi 🎆"
 ];
-let currentAriba=0;
-function startAribaFlow(){
-  currentAriba=0;
-  show('aribaPages');
-  showAribaMessage();
-}
-function showAribaMessage(){
-  let container=document.getElementById('aribaPages');
-  container.innerHTML='';
-  let h=document.createElement('h2');
-  container.appendChild(h);
-  typeWriter(aribaMessages[currentAriba], h);
-  let btn=document.createElement('button');
-  btn.innerText='Next';
-  btn.onclick=function(){
-    currentAriba++;
-    if(currentAriba<aribaMessages.length){
-      showAribaMessage();
-      burstConfetti();
-      if(currentAriba>=2) burstFireworks();
-    } else {
-      show('giftScreen');
-    }
+let aribaIndex=0;
+aribaNext.onclick=()=>{
+  aribaIndex++;
+  if(aribaIndex<aribaMessages.length){
+    type(aribaMsg,aribaMessages[aribaIndex]);
   }
-  container.appendChild(btn);
-  burstConfetti();
-  if(currentAriba>=2) burstFireworks();
-}
+};
 
-// HABIBA FLOW
-let habibaStep=0;
-let habibaBtnPress=0;
-function startHabibaFlow(){
-  habibaStep=0;
-  habibaBtnPress=0;
-  show('habibaPages');
-  showHabibaMessage();
-}
-function showHabibaMessage(){
-  let container=document.getElementById('habibaPages');
-  container.innerHTML='';
-  let msg='';
-  if(habibaStep===0) msg="Wwwwhhhaaaaaaaaaaat? Why u still heeeeeeeerreeeee? I alr said no Happy New Years for you 💅";
-  else if(habibaStep===1) msg="Alr fine I'll stop it. If u want it that bad tell Ayyanu Babu to wish it to u Me nai kar raha 🤧";
-  let h=document.createElement('h2');
-  container.appendChild(h);
-  typeWriter(msg,h);
-  if(habibaStep===0){
-    let btn=document.createElement('button');
-    btn.innerText='Next';
-    btn.onclick=function(){
-      habibaBtnPress++;
-      if(habibaBtnPress<=3){
-        // Teleport button to corners randomly
-        let positions=[
-          {top:'10%', left:'10%'},
-          {top:'80%', left:'10%'},
-          {top:'80%', left:'80%'},
-          {top:'10%', left:'80%'}
-        ];
-        let pos=positions[Math.floor(Math.random()*positions.length)];
-        btn.style.position='absolute';
-        btn.style.top=pos.top;
-        btn.style.left=pos.left;
-      } else {
-        habibaStep++;
-        showHabibaMessage();
-      }
-    }
-    container.appendChild(btn);
-  } else if(habibaStep===1){
-    // Gift box appears
-    let gift=document.createElement('div');
-    gift.id='giftIcon';
-    gift.innerText='🎁';
-    gift.onclick=function(){
-      // Show two emojis flying from gift
-      let emoji1=document.createElement('div');
-      emoji1.className='emoji';
-      emoji1.innerText='🫵';
-      document.body.appendChild(emoji1);
-      let emoji2=document.createElement('div');
-      emoji2.className='emoji';
-      emoji2.innerText='🤡';
-      document.body.appendChild(emoji2);
-      gift.onclick=null;
-    }
-    container.appendChild(gift);
+/* ---------- HABIBA ---------- */
+habiba1Btn.onclick=()=>{
+  show("habiba2");
+  type(habiba2Text,"wwwhhhaaaaaaaaaaat? Why u still heeeeeeeerreeeee? I alr said no Happy New years for you 💅");
+};
+let tpCount=0;
+const spots=[
+  {top:"10px",left:"10px"},
+  {bottom:"10px",right:"10px"},
+  {top:"10px",right:"10px"}
+];
+habibaTpBtn.onclick=()=>{
+  if(tpCount<3){
+    Object.assign(habibaTpBtn.style,spots[tpCount]);
+    tpCount++;
+  }else{
+    show("habibaGift");
   }
-}
+};
 
-// GENERIC FLOW
-document.getElementById('giftIcon').onclick=function(){
-  let gift=this;
-  let top=window.innerHeight/2;
-  let flyInterval=setInterval(()=>{
-    if(top<-100){ clearInterval(flyInterval); show('genericFinal'); return; }
-    top-=10;
-    gift.style.transform=`translateY(${top}px) scale(1.2)`;
-    burstConfetti();
-    if(top%40===0) burstFireworks();
-  },50);
-}
+/* ---------- HABIBA GIFT ---------- */
+giftIcon.onclick=()=>{
+  ["🫵","🤡"].forEach((e,i)=>{
+    let d=document.createElement("div");
+    d.className="emoji";
+    d.style.left=(50+i*60)+"%";
+    d.style.top="50%";
+    d.innerText=e;
+    document.body.appendChild(d);
+  });
+};
 
-// PARTICLES
-function burstFireworks(){for(let i=0;i<3;i++){let color={r:Math.floor(Math.random()*255),g:Math.floor(Math.random()*255),b:Math.floor(Math.random()*255)}; fireworks.push(new Firework(Math.random()*canvas.width, Math.random()*canvas.height/2, color));}}
-function burstConfetti(){for(let i=0;i<20;i++) confetti.push(new Confetti());}
-
-// START BUTTON TYPEWRITER
-window.onload=function(){
-  typeWriter("🎉 Ready for a Surprise?", document.getElementById('startText'));
-  typeWriter("Enter Your Name 💫", document.getElementById('nameText'));
-  document.getElementById('startBtn').onclick=goName;
-}
+/* ---------- GENERIC ---------- */
+giftIconGen.onclick=()=>{
+  type(genericMsg,"Happy New Year 🎆✨");
+};
 </script>
+
 </body>
 </html>
