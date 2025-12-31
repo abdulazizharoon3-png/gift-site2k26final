@@ -18,11 +18,12 @@ html, body {
 button {
   padding:15px 30px; font-size:20px; border:none; border-radius:12px;
   margin-top:20px; cursor:pointer; background: linear-gradient(45deg,#ff3cac,#784ba0,#2b86c5); color:white;
+  position:relative;
 }
 input {
   padding:12px; font-size:18px; border-radius:10px; border:2px solid white; text-align:center; margin-top:20px;
 }
-#giftIcon {font-size:60px; cursor:pointer; animation:bounce 1s infinite;}
+#giftBox {font-size:60px; cursor:pointer; animation:bounce 1s infinite;}
 @keyframes bounce {0%,100%{transform:translateY(0);}50%{transform:translateY(-20px);}}
 canvas {position:absolute; top:0; left:0; pointer-events:none;}
 h2 {padding:0 20px; line-height:1.5em;}
@@ -62,15 +63,11 @@ h2 {padding:0 20px; line-height:1.5em;}
 </div>
 <div id="habiba2" class="screen">
   <h2 id="habibaText2"></h2>
-  <button onclick="nextHabiba2()">Next</button>
+  <button id="habibaNextBtn" onclick="nextHabiba2()">Next</button>
 </div>
-<div id="habiba3" class="screen">
-  <h2 id="habibaText3"></h2>
-  <button onclick="nextHabiba3()">Next</button>
+<div id="habibaGift" class="screen">
+  <div id="giftBox">🎁</div>
 </div>
-
-<!-- Gift Screen -->
-<div id="giftScreen" class="screen"><div id="giftIcon">🫵🤡</div></div>
 
 <!-- Generic Final Screen -->
 <div id="genericFinal" class="screen">
@@ -166,8 +163,8 @@ function checkVerification(){
 // ARIBA FLOW
 const aribaMessages=[
   "Didi? 💖",
-  "Is it actually you?",
-  "I really love you ❤️‍🩹",
+  "oh hii didiii🥰",
+  "I made this code special, baaki sab ka isse different ha but same🫣",
   "You’re the best 🥰",
   "You kinda understood me like no one ever did 😌",
   "I felt comfortable around you like I never did around anyone else 💖",
@@ -219,34 +216,44 @@ function nextHabiba1(){
   show('habiba2');
   habibaClicks = 0;
   typeWriter(document.getElementById('habibaText2'), "wwwwhhhaaaaaaaaaaat? Why u still heeeeeeeerreeeee?\nI alr said no Happy New years for you 💅");
+  // Reset button position
+  let btn = document.getElementById('habibaNextBtn');
+  btn.style.position = 'relative';
+  btn.style.left = '0px';
+  btn.style.top = '0px';
 }
 function nextHabiba2(){
   habibaClicks++;
-  let h2 = document.getElementById('habibaText2');
+  let btn = document.getElementById('habibaNextBtn');
   if(habibaClicks <=3){
-    h2.style.position = "absolute";
-    h2.style.left = Math.random()*(window.innerWidth-300)+"px";
-    h2.style.top = Math.random()*(window.innerHeight-100)+"px";
-  } 
+    // teleport button to random corner
+    let corners = [
+      {x: 20, y:20},
+      {x: window.innerWidth-150, y:20},
+      {x: 20, y:window.innerHeight-80},
+      {x: window.innerWidth-150, y:window.innerHeight-80}
+    ];
+    let corner = corners[Math.floor(Math.random()*corners.length)];
+    btn.style.position = 'absolute';
+    btn.style.left = corner.x+'px';
+    btn.style.top = corner.y+'px';
+  }
   if(habibaClicks === 3){
-    show('habiba3');
-    typeWriter(document.getElementById('habibaText3'), "alr fine If u want it that bad tell ayyanu babu to wish it to u Me nai kar raha🤧");
+    show('habibaGift');
   }
 }
-function nextHabiba3(){
-  show('giftScreen');
-}
 
-// GENERIC FLOW
-document.getElementById('giftIcon').onclick=function(){
-  let gift=this;
-  let top=window.innerHeight/2;
-  let flyInterval=setInterval(()=>{
-    if(top<-100){ clearInterval(flyInterval); show('genericFinal'); return; }
+// Habiba gift click -> emojis fly out
+document.getElementById('giftBox').onclick = function(){
+  show('genericFinal');
+  let gift = this;
+  gift.innerText = '🫵🤡';
+  let top = window.innerHeight/2;
+  let interval = setInterval(()=>{
     top-=10;
-    gift.style.transform=`translateY(${top}px) scale(1.2)`;
+    gift.style.transform=`translateY(${top}px) scale(1.5)`;
     burstConfetti();
-    if(top%40===0) burstFireworks();
+    if(top<-100){ clearInterval(interval); gift.style.display='none'; }
   },50);
 }
 
