@@ -58,6 +58,11 @@ h2, h1 {padding:0 20px; line-height:1.5em;}
 <!-- Habiba Pages -->
 <div id="habibaPages" class="screen"></div>
 
+<!-- Habiba Gift Box -->
+<div id="habibaGift" class="screen">
+  <div id="giftIcon">🎁</div>
+</div>
+
 <!-- Generic Screens -->
 <div id="giftScreen" class="screen"><div id="giftIcon">🎁</div></div>
 <div id="genericFinal" class="screen">
@@ -154,8 +159,8 @@ function checkVerification(){
 // Ariba Flow
 const aribaMessages=[
   "Didi? 💖",
-  "oh hii didii🥰",
-  "I made this code speacial, baaki sab ka same ha but isse different 🤧",
+  "Is it really u? 🥹",
+  "I really love you ❤️‍🩹",
   "You’re the best 🥰",
   "You kinda understood me like no one ever did 😌",
   "I felt comfortable around you like I never did around anyone else 💖",
@@ -195,7 +200,7 @@ function showAribaMessage(){
   container.appendChild(btn);
 }
 
-// Habiba Flow
+// Habiba Flow with Gift Box
 let habibaStep=0;
 let habibaPresses=0;
 function startHabibaFlow(){
@@ -229,10 +234,18 @@ function showHabibaMessage(){
       }
     };
   } else if(habibaStep===2){
-    typeWriter(h,"Alr fine If u want it that bad tell ayyanu babu to wish it to u Me nai kar raha🤧");
-    btn.onclick=function(){ show('giftScreen'); };
+    typeWriter(h,"Alr fine If u want it that bad tell ayyanu babu to wish it to u Me nai kar raha🤧", ()=>{ show('habibaGift'); });
   }
   container.appendChild(btn);
+  burstConfetti();
+  burstFireworks();
+}
+
+// Habiba Gift Box Click
+document.querySelector('#habibaGift #giftIcon').onclick=function(){
+  let gift=this;
+  gift.innerText='🤡';
+  gift.style.fontSize='100px';
   burstConfetti();
   burstFireworks();
 }
