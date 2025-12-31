@@ -18,7 +18,6 @@ html, body {
 button {
   padding:15px 30px; font-size:20px; border:none; border-radius:12px;
   margin-top:20px; cursor:pointer; background: linear-gradient(45deg,#ff3cac,#784ba0,#2b86c5); color:white;
-  position:relative;
 }
 input {
   padding:12px; font-size:18px; border-radius:10px; border:2px solid white; text-align:center; margin-top:20px;
@@ -26,7 +25,7 @@ input {
 #giftIcon {font-size:60px; cursor:pointer; animation:bounce 1s infinite;}
 @keyframes bounce {0%,100%{transform:translateY(0);}50%{transform:translateY(-20px);}}
 canvas {position:absolute; top:0; left:0; pointer-events:none;}
-h2,h1 {padding:0 20px; line-height:1.5em;}
+h2, h1 {padding:0 20px; line-height:1.5em;}
 </style>
 </head>
 <body>
@@ -35,24 +34,39 @@ h2,h1 {padding:0 20px; line-height:1.5em;}
 
 <!-- Start Screen -->
 <div id="start" class="screen active">
-  <h1 id="startText"></h1>
+  <h1 id="startText">🎉 Ready for a Surprise?</h1>
   <button onclick="goName()">Start</button>
 </div>
 
 <!-- Name Input Screen -->
 <div id="name" class="screen">
-  <h2 id="nameText"></h2>
+  <h2 id="nameText">Enter Your Name 💫</h2>
   <input id="username" placeholder="Your Name">
   <button onclick="checkName()">Next</button>
 </div>
 
-<!-- Ariba/Habiba Pages Container -->
+<!-- Ariba Verification Screen -->
+<div id="verifyAriba" class="screen">
+  <h2 id="verifyText">Verification Required 🛡️</h2>
+  <input id="verifyInput" placeholder="Type Secret Phrase">
+  <button onclick="checkVerification()">Verify</button>
+</div>
+
+<!-- Ariba Pages Container -->
 <div id="aribaPages" class="screen"></div>
+
+<!-- Habiba Pages -->
+<div id="habibaPages" class="screen"></div>
 
 <!-- Generic Screens -->
 <div id="giftScreen" class="screen"><div id="giftIcon">🎁</div></div>
 <div id="genericFinal" class="screen">
-  <h2 id="finalText"></h2>
+  <h2 id="finalText">
+    🌟 “As the old year folds its final page, may your heart be lighter and your dreams soar higher.<br>
+    May laughter follow you like sunlight, and may every step you take in the new year be guided by hope, joy, and unforgettable moments.<br>
+    Here’s to 365 new chances, countless smiles, and the magic of new beginnings.<br>
+    Happy New Year! 🎆✨”
+  </h2>
 </div>
 
 <script>
@@ -101,84 +115,43 @@ function animate(){
 }
 animate();
 
-// Typewriter function
-function typeWriter(text, container, callback){
-  container.innerHTML='';
-  let i=0;
-  function typing(){
-    if(i<text.length){
-      container.innerHTML += text.charAt(i);
-      i++;
-      setTimeout(typing,30);
-    } else if(callback){
-      callback();
-    }
-  }
-  typing();
-}
-
 // Screens
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active');}
+function goName(){ show('name'); }
 
-// Start screen text
-typeWriter("🎉 Ready for a Surprise?", document.getElementById('startText'));
+// Typewriter effect
+function typeWriter(el, text, speed=40, callback){
+  el.innerHTML="";
+  let i=0;
+  function run(){
+    if(i<text.length){
+      el.innerHTML+=text.charAt(i);
+      i++;
+      setTimeout(run,speed);
+    } else if(callback) callback();
+  }
+  run();
+}
 
-// Name screen text
-typeWriter("Enter Your Name 💫", document.getElementById('nameText'));
-
-// Generic final text
-typeWriter(`🌟 “As the old year folds its final page, may your heart be lighter and your dreams soar higher.
-May laughter follow you like sunlight, and may every step you take in the new year be guided by hope, joy, and unforgettable moments.
-Here’s to 365 new chances, countless smiles, and the magic of new beginnings.
-Happy New Year! 🎆✨”`, document.getElementById('finalText'));
-
-// Name check
+// Name Check
 function checkName(){
-  let name = document.getElementById('username').value.toLowerCase().trim();
-  
-  if(name === 'ariba'){
-    showVerificationScreen();
-  } else if(name === 'habiba'){
-    startHabibaFlow();
-  } else {
-    show('giftScreen');
-  }
+  let name=document.getElementById('username').value.toLowerCase().trim();
+  if(name==='ariba'){ show('verifyAriba'); }
+  else if(name==='habiba'){ startHabibaFlow(); }
+  else{ show('giftScreen'); }
 }
 
-// Ariba verification
-function showVerificationScreen(){
-  let container = document.getElementById('aribaPages');
-  container.innerHTML = '';
-  show('aribaPages');
-
-  let h = document.createElement('h2');
-  typeWriter('Verification Required 🛡️', h);
-  container.appendChild(h);
-
-  let input = document.createElement('input');
-  input.id = 'verifyInput';
-  input.placeholder = 'Type the secret phrase';
-  container.appendChild(input);
-
-  let btn = document.createElement('button');
-  btn.innerText = 'Verify';
-  btn.onclick = checkVerification;
-  container.appendChild(btn);
-
-  input.focus();
-}
-
+// Ariba Verification
 function checkVerification(){
-  let phrase = document.getElementById('verifyInput').value.toLowerCase().trim();
-  if(phrase === 'aweee mera bacha'){
-    startAribaFlow();
-  } else {
-    let container = document.getElementById('aribaPages');
-    typeWriter('u aint my Didi gtfo 🖕', container);
+  let input=document.getElementById('verifyInput').value.toLowerCase().trim();
+  if(input==="aweee mera bacha"){ startAribaFlow(); }
+  else{
+    show('aribaPages');
+    typeWriter(document.getElementById('aribaPages'), "u aint my Didi gtfo 🖕");
   }
 }
 
-// Ariba messages
+// Ariba Flow
 const aribaMessages=[
   "Didi? 💖",
   "Is it really u? 🥹",
@@ -195,77 +168,73 @@ const aribaMessages=[
   "Every memory we shared is a treasure, and I can’t wait to make countless more with you. You are truly special, unforgettable, and I absolutely love you 🥹❤️‍🩹. This surprise is all for you because no one deserves it more. ❤️‍🩹💖”",
   "Happy New Year Didi ❤️‍🩹❤️‍🩹🎉🎆"
 ];
-let currentAriba = 0;
-
+let currentAriba=0;
 function startAribaFlow(){
-  currentAriba = 0;
+  let container=document.getElementById('aribaPages');
+  container.innerHTML='';
+  currentAriba=0;
   show('aribaPages');
   showAribaMessage();
 }
-
 function showAribaMessage(){
-  let container = document.getElementById('aribaPages');
-  typeWriter(aribaMessages[currentAriba], container, ()=>{
-    let btn = document.createElement('button');
-    btn.innerText = 'Next';
-    btn.onclick = function(){
-      currentAriba++;
-      if(currentAriba < aribaMessages.length){
-        showAribaMessage();
-        burstConfetti();
-        if(currentAriba >= 2) burstFireworks();
-      }
-    };
-    container.appendChild(btn);
-  });
-  burstConfetti();
-  if(currentAriba >= 2) burstFireworks();
+  let container=document.getElementById('aribaPages');
+  container.innerHTML='';
+  let h=document.createElement('h2');
+  container.appendChild(h);
+  typeWriter(h, aribaMessages[currentAriba]);
+  let btn=document.createElement('button');
+  btn.innerText='Next';
+  btn.onclick=function(){
+    currentAriba++;
+    if(currentAriba<aribaMessages.length){
+      showAribaMessage();
+      burstConfetti();
+      if(currentAriba>=2) burstFireworks();
+    }
+  };
+  container.appendChild(btn);
 }
 
-// Habiba flow
-const habibaScreens = [
-  "New Year but it aint Happy for you 💅",
-  "wwwwwhhhaaaaaaaaaaat? Why u still heeeeeeeerreeeee? I alr said no Happy New years for you 💅",
-  "Alr fine If u want it that bad tell ayyanu babu to wish it to u Me nai kar raha🤧"
-];
+// Habiba Flow
 let habibaStep=0;
-let habibaPressCount=0;
-
+let habibaPresses=0;
 function startHabibaFlow(){
-  habibaStep = 0;
-  habibaPressCount = 0;
-  show('aribaPages');
+  habibaStep=0;
+  habibaPresses=0;
+  show('habibaPages');
   showHabibaMessage();
 }
-
 function showHabibaMessage(){
-  let container = document.getElementById('aribaPages');
-  typeWriter(habibaScreens[habibaStep], container, ()=>{
-    let btn = document.createElement('button');
-    btn.innerText = 'Next';
-    btn.onclick = function(){
-      if(habibaStep===1){
-        habibaPressCount++;
-        if(habibaPressCount<3){
-          btn.style.position='absolute';
-          btn.style.top = Math.random()*(window.innerHeight-50)+'px';
-          btn.style.left = Math.random()*(window.innerWidth-150)+'px';
-        } else {
-          habibaStep++;
-          habibaPressCount=0;
-          showHabibaMessage();
-        }
+  let container=document.getElementById('habibaPages');
+  container.innerHTML='';
+  let h=document.createElement('h2');
+  container.appendChild(h);
+  let btn=document.createElement('button');
+  btn.innerText='Next';
+  
+  if(habibaStep===0){
+    typeWriter(h,"New Year but it aint Happy for you 💅");
+    btn.onclick=function(){ habibaStep=1; showHabibaMessage(); };
+  } else if(habibaStep===1){
+    typeWriter(h,"wwwwwhhhaaaaaaaaaaat? Why u still heeeeeeeerreeeee? I alr said no Happy New years for you 💅");
+    btn.onclick=function(){
+      habibaPresses++;
+      if(habibaPresses<3){
+        btn.style.position='absolute';
+        btn.style.top=Math.random()*(window.innerHeight-50)+'px';
+        btn.style.left=Math.random()*(window.innerWidth-120)+'px';
       } else {
-        habibaStep++;
-        if(habibaStep<habibaScreens.length){
-          showHabibaMessage();
-        }
+        habibaStep=2;
+        showHabibaMessage();
       }
     };
-    container.appendChild(btn);
-  });
+  } else if(habibaStep===2){
+    typeWriter(h,"Alr fine If u want it that bad tell ayyanu babu to wish it to u Me nai kar raha🤧");
+    btn.onclick=function(){ show('giftScreen'); };
+  }
+  container.appendChild(btn);
   burstConfetti();
-  if(habibaStep>=1) burstFireworks();
+  burstFireworks();
 }
 
 // GENERIC FLOW
